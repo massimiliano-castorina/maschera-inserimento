@@ -1,0 +1,220 @@
+package com.insertmask.initial.controller;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Spliterator;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.apache.commons.lang3.*;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.hibernate.mapping.Map;
+
+import com.codesnippets4all.json.parsers.JSONParser;
+import com.codesnippets4all.json.parsers.JsonParserFactory;
+import com.insertmask.initial.model.*;
+
+import net.minidev.json.JSONObject;
+
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+@RestController
+public class Controller {
+
+	@Autowired
+	IReferents ref;
+	
+	@Autowired
+	IRegistration reg;
+	
+	@Autowired
+	IResearchedTechnologies resTeck;
+	
+	int lastIdRef;
+	int lastIdResTeck;
+	
+	
+    public static String[] cleanItArr(String[] arg0) {
+    	String[] s = new String[arg0.length];
+    	for(int i = 0; i<arg0.length; i++) {
+    		s[i] = arg0[i].replaceAll("[/.<.>.^.+.*.#.]", "").replaceAll("'.", " ");
+    	}
+    	return s;
+    	//System.out.println(cleanIt(arg0));s
+    	//return s;
+    }
+    
+    public static String cleanIt(String arg0) {
+    	String s;
+		s = arg0.replaceAll("[/.<.>.^.+.*.#.]", "").replaceAll("'.", " ");
+		return s;
+    }
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/registration")
+	@ResponseBody
+	//public void insertNewRegistration(@RequestBody Referents obj) {
+	//public void insertNewRegistration(@RequestBody Registration rg, @RequestBody Registration rg, @RequestBody Registration rg) {
+	public void insertNewRegistration(@RequestBody Object rg) {
+		HashMap<String, String> listNameresearchedtechnlogies = new HashMap();
+		
+		ref.findAll().forEach(searchRf -> {
+			if(searchRf.getId() != null) {
+				lastIdRef = searchRf.getId()+1;
+			} else {
+				lastIdRef = 1;
+			}
+			
+		});
+		
+		resTeck.findAll().forEach(searchRf -> {
+			if(searchRf.getId_customer() != null) {
+				lastIdResTeck = searchRf.getId_customer()+1;
+			} else {
+				lastIdResTeck = 1;
+			}
+			if(searchRf.getId_customer() != null) {
+				listNameresearchedtechnlogies.put(searchRf.getId().toString(), searchRf.getNameresearchedtechnlogies());
+			}
+		});
+		
+		System.out.println(listNameresearchedtechnlogies);
+		//E veramente una LinkedHashMap<object,object>
+		@SuppressWarnings("rawtypes")
+		LinkedHashMap map = (LinkedHashMap) rg;
+		LinkedHashMap map2 = (LinkedHashMap) rg;
+		//System.out.println(map2.get("nameresearchedtechnlogies").getClass().toString());
+		ArrayList a = new ArrayList();
+		JSONObject obj = new JSONObject();
+		a= (ArrayList) map2.get("nameresearchedtechnlogies");
+		for(int i = 0; i < a.size(); i++) {
+			obj.appendField("id"+i, (String) ((LinkedHashMap) a.get(i)).get("id"+i));
+			//obj.appendField((a.get(i).toString()),0);
+			//obj.appendField((String) ((LinkedHashMap) a.get(0)).get("java"),0);
+		}
+		
+		//System.out.println(obj.get("id0"));
+		//System.out.println(obj.appendField((String) ((LinkedHashMap) a.get(1)).get("id"+1),1));
+		//String p = map.get("nameresearchedtechnlogies");
+
+		//FORMATA COSI : {customer=prova1, office=prova1, referents=prova1, researched-technologies=prova1}
+		
+		//PRENDO PER ESEMPIO REFERENTS=REFERENTS NAME
+		Referents referents = new Referents();
+		Registration registration = new Registration();
+		//ResearchedTechnologies researchedTechnologies = new ResearchedTechnologies();
+		
+
+		try {
+			String namereferents = map.get("namereferents").toString().toString();
+			if(namereferents != "") {
+				referents.setNamereferents(cleanIt(namereferents));
+			}
+		}
+		catch(Exception e)  {
+			System.out.print(e);
+			System.out.println("  namereferents is null or invalid");
+		}
+		try {
+			String customer = map.get("customer").toString().toString();
+			if(customer != "")
+				registration.setCustomer(cleanIt(customer));
+		}
+		catch(Exception e)  {
+			System.out.print(e);
+			System.out.println("  customer is null or invalid");
+		}
+		try {
+			String office = map.get("office").toString().toString();
+			if(office != "")
+				registration.setOffice(cleanIt(office));
+		}
+		catch(Exception e)  {
+			System.out.print(e);
+			System.out.println("  office is null or invalid");
+		}
+		try {
+			a = (ArrayList) map2.get("nameresearchedtechnlogies");
+			for(int i = 0; i < a.size(); i++) {
+				ResearchedTechnologies researchedTechnologies = new ResearchedTechnologies();
+				obj.appendField("id"+i, (String) ((LinkedHashMap) a.get(i)).get("id"+i));
+				//obj.appendField((a.get(i).toString()),0);
+				//obj.appendField((String) ((LinkedHashMap) a.get(0)).get("java"),0);
+				researchedTechnologies.setNameresearchedtechnlogies(cleanIt(obj.get("id"+i).toString()));
+				researchedTechnologies.setId_customer(lastIdResTeck);
+				//resTeck.save(researchedTechnologies);
+				System.out.println("ho salvato");
+//				if(!listNameresearchedtechnlogies.containsValue(researchedTechnologies.getNameresearchedtechnlogies())) {
+//					resTeck.save(researchedTechnologies);
+//					System.out.println("ho salvato");
+//				}
+//				else {
+//					
+//					System.out.println(researchedTechnologies.getId());
+//				}
+				resTeck.findAll().forEach(searchRf -> {
+					System.out.println(searchRf.getId_customer());
+//					if(searchRf.getId_customer() == 0) {
+//						System.out.println("id customer trovato");
+//					}
+//				});
+			}
+		}
+		catch(Exception e)  {
+			System.out.print(e);
+			System.out.println("  nameresearchedtechnlogies is null or invalid");
+		}
+		
+		ResearchedTechnologies researchedTechnologies = new ResearchedTechnologies();
+		//System.out.println(referents.getNamereferents());
+		//System.out.println(registration.getCustomer());
+		//System.out.println(registration.getOffice());
+		//System.out.println(researchedTechnologies.getNameresearchedtechnlogies());
+		
+		if(registration.getCustomer() != null && registration.getOffice() != null) {
+			if(referents.getNamereferents() != null) {
+				registration.setId_referents(lastIdRef);
+			}
+			if(researchedTechnologies.getNameresearchedtechnlogies() != null) {
+				registration.setId_researchedtechnologies(lastIdResTeck);
+			}
+			//reg.save(registration);
+		}
+		if(referents.getNamereferents() != null) {
+			
+			//ref.save(referents);
+		}
+		if(researchedTechnologies.getNameresearchedtechnlogies() != null) {
+			//System.out.println(researchedTechnologies);
+			//resTeck.save(researchedTechnologies);
+		}
+		
+		//referents.setId(lastIdRef);
+		//researchedTechnologies.setId(lastIdResTeck);
+		
+		//System.out.println("sono qui");
+		//registration.setIdReferents(lastIdRef);
+		//registration.setIdResearchTechnologies(lastIdResTeck);
+		
+		//ref.save(referents);
+		//resTeck.save(researchedTechnologies);
+		//reg.save(registration);
+	}
+
+	private char[] typeof(Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+}

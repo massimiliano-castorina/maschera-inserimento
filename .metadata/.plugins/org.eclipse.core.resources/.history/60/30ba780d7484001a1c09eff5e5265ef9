@@ -1,0 +1,5 @@
+package com.insertmask.initial.controller;
+
+public enum Referents {
+
+}

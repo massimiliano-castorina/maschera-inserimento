@@ -1,0 +1,102 @@
+package com.insertmask.initial.model;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name= "registration")
+public class Registration {
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	//@Column(name = "id", insertable = false, updatable = false)
+	@Column(name = "id")
+	private int id;
+	
+	@Column(name = "customer")
+	private String customer;
+	
+	@Column(name = "office")
+	private String office;
+	
+	//@ManyToOne(targetEntity = Referents.class)
+    //@JoinColumn(name = "id")
+	//@Column(name = "id")
+	//@Column(insertable = false, updatable = false)
+	private Integer id_referents;
+	
+	//@ManyToOne(targetEntity = ResearchedTechnologies.class)
+    //@JoinColumn(name = "id")
+	//@Column(name = "id")
+	//@Column(insertable = false, updatable = false)
+	private Integer id_researchedtechnologies;
+	
+	@OneToOne(mappedBy = "registration")
+	private Referents ref;
+	
+	public Registration() {}
+	
+//	public Registration(Referents r, String nameReferents) {
+//		super();
+//		r.setName(nameReferents);
+//	}
+//	
+//	public Registration(ResearchedTechnologies rt, String nameRt){
+//		super();
+//		rt.setName(nameRt);
+//	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(String customer) {
+		this.customer = customer;
+	}
+
+	public String getOffice() {
+		return office;
+	}
+
+	public void setOffice(String office) {
+		this.office = office;
+	}
+
+	public int getReferents() {
+		return id_referents;
+	}
+
+	public void setIdReferents(int idReferents) {
+		this.id_referents = idReferents;
+	}
+
+	public int getIdResearchTechnologies() {
+		return id_researchedtechnologies;
+	}
+
+	public void setIdResearchTechnologies(int idResearchedtechnologies) {
+		this.id_researchedtechnologies = idResearchedtechnologies;
+	}
+	
+	public String getNameReferents() {
+		return ref.getNamereferents();
+	}
+}
